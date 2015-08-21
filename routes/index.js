@@ -1,4 +1,5 @@
 var env = require('../env');
+var fs = require('fs');
 var express = require('express');
 var request = require('request');
 var parser = require('xml2json');
@@ -14,15 +15,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/json', function(req, res, next) {
     res.header('Content-Type', 'application/json; charset=utf-8');
-    var options = {
-        url: env.url_tenrain
-    };
-    request(options, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var json = parser.toJson(body);
-            res.send(json);
-        }
-    })
+    res.send(env.json);
 });
 
 module.exports = router;
