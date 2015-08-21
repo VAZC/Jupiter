@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nodemon ./bin/www"
   },
   "dependencies": {
     "body-parser": "~1.13.1",
@@ -12,6 +12,9 @@
     "express": "~4.13.0",
     "jade": "~1.11.0",
     "morgan": "~1.6.1",
-    "serve-favicon": "~2.3.0"
+    "nodemon": "^1.4.1",
+    "request": "^2.61.0",
+    "serve-favicon": "~2.3.0",
+    "xml2json": "^0.8.2"
   }
 }
