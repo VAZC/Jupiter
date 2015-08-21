@@ -14,8 +14,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/json', function(req, res, next) {
-    res.header('Content-Type', 'application/json; charset=utf-8');
-    res.send(env.json);
+    res.json(env.locations);
 });
 
 module.exports = router;
