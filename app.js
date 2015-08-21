@@ -1,3 +1,4 @@
+process.env.TZ = 'Asia/Taipei';
 var env = require('./env');
 var express = require('express');
 var path = require('path');
@@ -63,7 +64,11 @@ app.use(function(err, req, res, next) {
 var CronJob = require('cron').CronJob;
 var request = require('request');
 var parser = require('xml2json');
+var fs = require('fs');
+var moment = require('moment');
 var getJSON = function() {
+    // var time = new Date().toISOString().replace(/-|:|Z/g, '').replace(/T|\s|\./g, '_');
+    var time = moment().format('YYYYMMDD_hhmmss');
     request({
         url: env.url_tenrain
     }, function(error, response, body) {
@@ -71,24 +76,24 @@ var getJSON = function() {
             env.rawJSON = JSON.parse(parser.toJson(body));
             var locations = env.rawJSON.cwbopendata.location;
             for (var i = 0; i < locations.length; i++) {
-            	var parameter = {};
+                var parameter = {};
                 locations[i].parameter.forEach(function(element, index, array) {
-                	var key = locations[i].parameter[index].parameterName;
-                	var value = locations[i].parameter[index].parameterValue;
-                	parameter[key] = value;
+                    var key = locations[i].parameter[index].parameterName;
+                    var value = locations[i].parameter[index].parameterValue;
+                    parameter[key] = value;
                 });
                 locations[i].parameter = parameter;
-            	var weatherElement = {};
+                var weatherElement = {};
                 locations[i].weatherElement.forEach(function(element, index, array) {
-                	var key = locations[i].weatherElement[index].elementName;
-                	var value = locations[i].weatherElement[index].elementValue.value;
-                	weatherElement[key] = value;
+                    var key = locations[i].weatherElement[index].elementName;
+                    var value = locations[i].weatherElement[index].elementValue.value;
+                    weatherElement[key] = value;
                 });
                 locations[i].weatherElement = weatherElement;
             };
             env.locations = locations;
-            var time = new Date().toISOString().replace('T', ' ');
-            console.log('Updated XML in ' + time);
+            fs.writeFile('data/'+time+'.json', JSON.stringify(locations));
+            console.log('Updated JSON in ' + time);
         }
     });
 };
