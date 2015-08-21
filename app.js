@@ -67,8 +67,7 @@ var parser = require('xml2json');
 var fs = require('fs');
 var moment = require('moment');
 var getJSON = function() {
-    // var time = new Date().toISOString().replace(/-|:|Z/g, '').replace(/T|\s|\./g, '_');
-    var time = moment().format('YYYYMMDD_hhmmss');
+    var time = moment().format('YYYYMMDD_hhmmss_SSS');
     request({
         url: env.url_tenrain
     }, function(error, response, body) {
