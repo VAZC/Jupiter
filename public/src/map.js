@@ -48,11 +48,12 @@ function initMap(position) {
     });
 
     $.get('/json', function(result) {
-        stations = result;
+        var oripoint = [];
         var stationsfc = [];
+        stations = result;
+
         for (var i = 0; i < result.length; i++) {
             var rainfall = result[i].weatherElement.MIN_10;
-
             var mapData = new google.maps.Data();
 
             mapData.setStyle({
@@ -60,6 +61,8 @@ function initMap(position) {
             });
 
             var point = turf.point([result[i].lon, result[i].lat]);
+            oripoint.push([result[i].lon, result[i].lat]);
+        
             stationsfc.push(point);
             mapData.addGeoJson(point);
             mapData.setMap(map);
@@ -68,13 +71,32 @@ function initMap(position) {
             stations[i].mapData = mapData;
         };
 
-        var tin = turf.tin(turf.featurecollection(stationsfc), 'elevation');
-        //console.log(tin);
-        map.data.addGeoJson(tin);
+        var voronoi = d3.geom.voronoi();
+        var vor_polygons = voronoi(oripoint);
 
-        // jupiter.setStations(stations);
-        // jupiter.calcBound();
+        vor_polygons.forEach(function(element, index) {
+            map.data.addGeoJson(ArrayToConvex(element));
+        });
     });
+}
+
+function ArrayToConvex(e) {
+    var boundfs = turf.featurecollection([
+        turf.point([119.3135, 25.3]),
+        turf.point([122.0180, 25.3]),
+        turf.point([122.0180, 21.89]),
+        turf.point([119.3135, 21.89])
+    ]);
+    var bound = turf.convex(boundfs);
+
+    var tps = [];
+    for (var i = 0; i < e.length; i++) {
+        var p = e[i];
+        tps.push(turf.point(p));
+    }
+    var fc = turf.featurecollection(tps);
+    var convex = turf.convex(fc);
+    return turf.intersect(bound, convex);
 }
 
 var weather10MinLevels = [
@@ -105,7 +127,7 @@ var weather10MinLevels = [
 }];
 
 function getWeather10MinLevel(rainfall) {
-    var level = 0;
+    var level = 1;
     if (rainfall < 0)
         return level;
 
@@ -122,83 +144,15 @@ function getWeather10MinLevel(rainfall) {
 
 function getWeatherStyle(rainfall) {
     var level = getWeather10MinLevel(rainfall);
-
+    var index = level - 1;
     style = {
         path: google.maps.SymbolPath.CIRCLE,
         fillOpacity: 0.8,
-        fillColor: weather10MinLevels[level].color,
+        fillColor: weather10MinLevels[index].color,
         strokeOpacity: 0.5,
-        strokeColor: weather10MinLevels[level].color,
+        strokeColor: weather10MinLevels[index].color,
         scale: 6
     };
 
     return style;
 }
-
-// function Jupiter() {
-//     // private
-//     var that = this;
-//     var stations;
-
-//     // public
-//     this.setStations = setStations;
-//     this.getStations = getStations;
-//     this.getFilterGeoStations = getFilterGeoStations;
-//     this.calcBound = calcBound;
-
-//     function setStations(s) {
-//         stations = s;
-//     }
-
-//     function getStations() {
-//         return stations;
-//     }
-
-//     function getGeoStations(station) {
-//         var geoStations = [];
-
-//         for (var i = 0; i < stations.length; i++) {
-//             if (!station && station === stations[i])
-//                 continue;
-
-//             geoStations.push(stations[i].point);
-//         }
-
-//         return geoStations;
-//     }
-
-//     function getFilterGeoStations(station) {
-//         return getGeoStations(stations.filter(function(obj) {
-//             return obj !== station;
-//         }));
-//     }
-
-//     function calcBound() {
-//         for (var i = 0; i < stations.length; i++) {
-//             var filterGeoStations = getFilterGeoStations();
-//             var current = stations[i];
-//             current.nextpoint = turf.nearest(current.point, filterGeoStations);
-//         }
-
-        // for (var i = 0; i < stations.length; i++) {
-        //     var current = stations[i];
-        //     var current.nextpoint = current;
-        //     current.nextpoint.dis = Number.MAX_SAFE_INTEGER;
-
-        //     for (var j = 0; j < station.length; j++) {
-        //         if (i === j) continue;
-        //         var nextpoint = stations[j];
-
-        //         var dis = turf.distance(current.point, nextpoint.point, 'kilometers');
-        //         if (dis < current.nextpoint.dis) {
-        //             current.nextpoint = nextpoint;
-        //             current.nextpoint.dis = dis;
-        //         }
-        //     }
-        // }
-//     }
-
-//     function paintBoundArea() {
-
-//     }
-// }
