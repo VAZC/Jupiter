@@ -7,6 +7,30 @@ var defaultCenterLatLng = {
     lng: 121.51709318161011
 };
 
+var mapStyles = [{
+   "featureType": "all",
+   "elementType": "geometry",
+   "stylers": [
+     { "saturation": -100 },
+     { "lightness": -8 },
+     { "gamma": 1.18 }
+     ]
+}, {
+   "featureType": "water",
+   "elementType": "geometry",
+   "stylers": [
+     { "Hue": "#004cff"},
+     { "saturation": 100 }
+     ]
+}, {
+   "featureType": "road.highway",
+   "elementType": "all",
+   "stylers": [
+     { "Visibility": "off"}
+     ]
+}];
+
+
 function main() {
     console.log("centerLatLng");
     getLocation();
@@ -36,10 +60,17 @@ function initMap(position) {
         centerLatLng = defaultCenterLatLng;
     }
 
+    var styledMapType = new google.maps.StyledMapType(mapStyles, {name: "Styled Map"});
+
     map = new google.maps.Map(document.getElementById('map'), {
         center: centerLatLng,
-        zoom: 13
+        zoom: 13,
+        mapTypeControlOptions: {
+            mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
+        }
     });
+    map.mapTypes.set('map_style', styledMapType);
+    map.setMapTypeId('map_style');
 
     myLocationMarker = new google.maps.Marker({
         position: centerLatLng,
