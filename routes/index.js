@@ -16,6 +16,12 @@ router.get('/', function(req, res, next) {
     });
 });
 
+router.get('/possibleAreas', function(req, res, next) {
+    // Stations oldList, Stations newList;
+    // predict.possibleAreas(oldList, newList);
+    res.json('working');
+});
+
 router.get('/json', function(req, res, next) {
     res.json(env.locations);
 });
