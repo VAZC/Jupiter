@@ -58,89 +58,38 @@ function initMap(position) {
     });
 
     $.get('/json', function(result) {
-        var stations = result;
-        var stationsfc = [];
+        var oripoint = [];
         for (var i = 0; i < result.length; i++) {
             console.log(result[i]);
             var point = turf.point([result[i].lon, result[i].lat]);
-            stations[i].point = point;
-            stationsfc.push(point);
+            oripoint.push([result[i].lon, result[i].lat]);
             map.data.addGeoJson(point);
         };
 
-        var tin = turf.tin(turf.featurecollection(stationsfc), 'elevation');
-        console.log(tin);
-        map.data.addGeoJson(tin);
+        var voronoi = d3.geom.voronoi();
+        var vor_polygons = voronoi(oripoint);
 
-        // jupiter.setStations(stations);
-        // jupiter.calcBound();
+        vor_polygons.forEach(function(element, index) {
+            map.data.addGeoJson(ArrayToConvex(element));
+        });
     });
 }
 
-// function Jupiter() {
-//     // private
-//     var that = this;
-//     var stations;
+function ArrayToConvex(e) {
+    var boundfs = turf.featurecollection([
+        turf.point([119.3135, 25.3]),
+        turf.point([122.0180, 25.3]),
+        turf.point([122.0180, 21.89]),
+        turf.point([119.3135, 21.89])
+    ]);
+    var bound = turf.convex(boundfs);
 
-//     // public
-//     this.setStations = setStations;
-//     this.getStations = getStations;
-//     this.getFilterGeoStations = getFilterGeoStations;
-//     this.calcBound = calcBound;
-
-//     function setStations(s) {
-//         stations = s;
-//     }
-
-//     function getStations() {
-//         return stations;
-//     }
-
-//     function getGeoStations(station) {
-//         var geoStations = [];
-
-//         for (var i = 0; i < stations.length; i++) {
-//             if (!station && station === stations[i])
-//                 continue;
-
-//             geoStations.push(stations[i].point);
-//         }
-
-//         return geoStations;
-//     }
-
-//     function getFilterGeoStations(station) {
-//         return getGeoStations(stations.filter(function(obj) {
-//             return obj !== station;
-//         }));
-//     }
-
-//     function calcBound() {
-//         for (var i = 0; i < stations.length; i++) {
-//             var filterGeoStations = getFilterGeoStations();
-//             var current = stations[i];
-//             current.nextpoint = turf.nearest(current.point, filterGeoStations);
-//         }
-
-        // for (var i = 0; i < stations.length; i++) {
-        //     var current = stations[i];
-        //     var current.nextpoint = current;
-        //     current.nextpoint.dis = Number.MAX_SAFE_INTEGER;
-
-        //     for (var j = 0; j < station.length; j++) {
-        //         if (i === j) continue;
-        //         var nextpoint = stations[j];
-
-        //         var dis = turf.distance(current.point, nextpoint.point, 'kilometers');
-        //         if (dis < current.nextpoint.dis) {
-        //             current.nextpoint = nextpoint;
-        //             current.nextpoint.dis = dis;
-        //         }
-        //     }
-        // }
-//     }
-
-//     function paintBoundArea() {
-
-//     }
-// }
+    var tps = [];
+    for (var i = 0; i < e.length; i++) {
+        var p = e[i];
+        tps.push(turf.point(p));
+    }
+    var fc = turf.featurecollection(tps);
+    var convex = turf.convex(fc);
+    return turf.intersect(bound, convex);
+}
