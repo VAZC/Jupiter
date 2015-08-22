@@ -105,7 +105,7 @@ var weather10MinLevels = [
 }];
 
 function getWeather10MinLevel(rainfall) {
-    var level = 0;
+    var level = 1;
     if (rainfall < 0)
         return level;
 
@@ -122,13 +122,13 @@ function getWeather10MinLevel(rainfall) {
 
 function getWeatherStyle(rainfall) {
     var level = getWeather10MinLevel(rainfall);
-
+    var index = level - 1;
     style = {
         path: google.maps.SymbolPath.CIRCLE,
         fillOpacity: 0.8,
-        fillColor: weather10MinLevels[level].color,
+        fillColor: weather10MinLevels[index].color,
         strokeOpacity: 0.5,
-        strokeColor: weather10MinLevels[level].color,
+        strokeColor: weather10MinLevels[index].color,
         scale: 6
     };
 
