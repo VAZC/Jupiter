@@ -79,7 +79,7 @@ var getCwbXML = function() {
         }
     });
 };
-new CronJob('1,11,21,31,41,51 * * * * *', function() {
+new CronJob('*/2 * * * *', function() {
     getCwbXML();
 }, null, true, 'Asia/Taipei');
 getCwbXML();
