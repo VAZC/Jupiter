@@ -1,4 +1,3 @@
-process.env.TZ = 'Asia/Taipei';
 var env = require('./env');
 var express = require('express');
 var path = require('path');

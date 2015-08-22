@@ -1,4 +1,5 @@
 var map;
+var stations;
 var myLocationMarker;
 // var jupiter;
 var defaultCenterLatLng = {
@@ -46,24 +47,28 @@ function initMap(position) {
         map: map
     });
 
-    map.data.setStyle({
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#333333',
-            fillOpacity: 0.8,
-            strokeColor: '#666666',
-            strokeOpacity: 0.5,
-            scale: 8
-        }
-    });
-
     $.get('/json', function(result) {
         var oripoint = [];
+        var stationsfc = [];
+        stations = result;
+
         for (var i = 0; i < result.length; i++) {
-            console.log(result[i]);
+            var rainfall = result[i].weatherElement.MIN_10;
+            var mapData = new google.maps.Data();
+
+            mapData.setStyle({
+                icon: getWeatherStyle(rainfall)
+            });
+
             var point = turf.point([result[i].lon, result[i].lat]);
             oripoint.push([result[i].lon, result[i].lat]);
-            map.data.addGeoJson(point);
+        
+            stationsfc.push(point);
+            mapData.addGeoJson(point);
+            mapData.setMap(map);
+
+            stations[i].point = point;
+            stations[i].mapData = mapData;
         };
 
         var voronoi = d3.geom.voronoi();
@@ -92,4 +97,62 @@ function ArrayToConvex(e) {
     var fc = turf.featurecollection(tps);
     var convex = turf.convex(fc);
     return turf.intersect(bound, convex);
+}
+
+var weather10MinLevels = [
+    {
+        level: 1, interval: 0, color: '#FFFFFF'
+    }, {
+        level: 2, interval: 1, color: '#F2F2F2'
+    }, {
+        level: 3, interval: 2, color: '#89C0DA'
+    }, {
+        level: 4, interval: 3, color: '#65D97D'
+    }, {
+        level: 5, interval: 4, color: '#98FF72'
+    }, {
+        level: 6, interval: 6, color: '#DBF977'
+    }, {
+        level: 7, interval: 8, color: '#F2B950'
+    }, {
+        level: 8, interval: 10, color: '#D96941'
+    }, {
+        level: 9, interval: 12, color: '#CF323A'
+    }, {
+        level: 10, interval: 14, color: '#9F0909'
+    }, {
+        level: 11, interval: 16, color: '#9E0A38'
+    }, {
+        level: 12, interval: 18, color: '#A41441'
+}];
+
+function getWeather10MinLevel(rainfall) {
+    var level = 1;
+    if (rainfall < 0)
+        return level;
+
+    for (var i = 0; i < weather10MinLevels.length; ++i) {
+        if (rainfall < weather10MinLevels[i].interval) {
+            level = i;
+            return level;
+        }
+    }
+
+    level = weather10MinLevels.length;
+    return level;
+}
+
+function getWeatherStyle(rainfall) {
+    var level = getWeather10MinLevel(rainfall);
+    var index = level - 1;
+    style = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillOpacity: 0.8,
+        fillColor: weather10MinLevels[index].color,
+        strokeOpacity: 0.5,
+        strokeColor: weather10MinLevels[index].color,
+        scale: 6
+    };
+
+    return style;
 }
