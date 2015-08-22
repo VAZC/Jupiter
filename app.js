@@ -60,46 +60,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-var CronJob = require('cron').CronJob;
-var request = require('request');
-var parser = require('xml2json');
-var fs = require('fs');
-var moment = require('moment');
-var getJSON = function() {
-    var time = moment().format('YYYYMMDD_hhmmss_SSS');
-    request({
-        url: env.url_tenrain
-    }, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            env.rawJSON = JSON.parse(parser.toJson(body));
-            var locations = env.rawJSON.cwbopendata.location;
-            for (var i = 0; i < locations.length; i++) {
-                var parameter = {};
-                locations[i].parameter.forEach(function(element, index, array) {
-                    var key = locations[i].parameter[index].parameterName;
-                    var value = locations[i].parameter[index].parameterValue;
-                    parameter[key] = value;
-                });
-                locations[i].parameter = parameter;
-                var weatherElement = {};
-                locations[i].weatherElement.forEach(function(element, index, array) {
-                    var key = locations[i].weatherElement[index].elementName;
-                    var value = locations[i].weatherElement[index].elementValue.value;
-                    weatherElement[key] = value;
-                });
-                locations[i].weatherElement = weatherElement;
-            };
-            env.locations = locations;
-            fs.writeFile('data/'+time+'.json', JSON.stringify(locations));
-            console.log('Updated JSON in ' + time);
-        }
-    });
-};
-
-new CronJob('0 * * * * *', function() {
-    getJSON();
-}, null, true, 'Asia/Taipei');
-
-getJSON();
-
 module.exports = app;

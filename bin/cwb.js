@@ -45,7 +45,7 @@ var getEnvLocations = function(locations) {
 var getCwbXML = function() {
     var start_time = logTime('start');
     request({
-        url: env.url_tenrain
+        url: env.url_tenrain+'&gy='+Math.random()
     }, function(error, response, body) {
         if (!error && response.statusCode == 200) {
             var locations = getCwbLocations(body);
