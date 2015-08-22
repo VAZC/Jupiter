@@ -47,13 +47,13 @@ function initMap(position) {
         map: map
     });
 
-    $.get('/json', function(result) {
+    $.get('/station', function(result) {
         var oripoint = [];
         var stationsfc = [];
         stations = result;
 
         for (var i = 0; i < result.length; i++) {
-            var rainfall = result[i].weatherElement.MIN_10;
+            var rainfall = result[i].min_10;
             var mapData = new google.maps.Data();
 
             mapData.setStyle({
@@ -62,7 +62,7 @@ function initMap(position) {
 
             var point = turf.point([result[i].lon, result[i].lat]);
             oripoint.push([result[i].lon, result[i].lat]);
-        
+
             stationsfc.push(point);
             mapData.addGeoJson(point);
             mapData.setMap(map);

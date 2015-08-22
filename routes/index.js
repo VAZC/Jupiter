@@ -22,7 +22,7 @@ router.get('/json', function(req, res, next) {
 
 router.get('/station', function(req, res, next) {
     db.serialize(function() {
-        var select_station_query = db.prepare("select * from station order by stationId desc");
+        var select_station_query = db.prepare("select station.*, measurement.min_10, measurement.hour_3, measurement.hour_6, measurement.hour_12, measurement.hour_24, measurement.time from station left join measurement on measurement.stationId = station.stationId group by station.stationId order by measurement.time desc");
         select_station_query.all([], function(err, rows) {
             res.json(rows);
         });
@@ -35,10 +35,10 @@ router.get('/station/:id', function(req, res, next) {
         var select_measurement_query = db.prepare("select * from measurement where stationId=?");
         var station = {};
         select_station_query.get([req.params.id], function(err, row) {
-        	if (!row) {
-        		res.send('Fuck you');
-        		return;
-        	};
+            if (!row) {
+                res.send('Fuck you');
+                return;
+            };
             station = row;
             select_measurement_query.all([req.params.id], function(err, rows) {
                 station.measurements = rows;
