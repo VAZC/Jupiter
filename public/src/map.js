@@ -8,26 +8,29 @@ var defaultCenterLatLng = {
 };
 
 var mapStyles = [{
-   "featureType": "all",
-   "elementType": "geometry",
-   "stylers": [
-     { "saturation": -100 },
-     { "lightness": -8 },
-     { "gamma": 1.18 }
-     ]
+    "featureType": "all",
+    "elementType": "geometry",
+    "stylers": [{
+        "saturation": -100
+    }, {
+        "lightness": -8
+    }, {
+        "gamma": 1.18
+    }]
 }, {
-   "featureType": "water",
-   "elementType": "geometry",
-   "stylers": [
-     { "Hue": "#004cff"},
-     { "saturation": 100 }
-     ]
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{
+        "Hue": "#004cff"
+    }, {
+        "saturation": 100
+    }]
 }, {
-   "featureType": "road.highway",
-   "elementType": "all",
-   "stylers": [
-     { "Visibility": "off"}
-     ]
+    "featureType": "road.highway",
+    "elementType": "all",
+    "stylers": [{
+        "Visibility": "off"
+    }]
 }];
 
 
@@ -60,11 +63,13 @@ function initMap(position) {
         centerLatLng = defaultCenterLatLng;
     }
 
-    var styledMapType = new google.maps.StyledMapType(mapStyles, {name: "Styled Map"});
+    var styledMapType = new google.maps.StyledMapType(mapStyles, {
+        name: "Styled Map"
+    });
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: centerLatLng,
-        zoom: 13,
+        zoom: 8,
         mapTypeControlOptions: {
             mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
         }
@@ -78,7 +83,9 @@ function initMap(position) {
         map: map
     });
 
-    $.get('/station', function(result) {
+    $.when($.get('/taiwan.geo.json'), $.get('/station')).then( function(points, result) {
+        result = result[0];
+
         var oripoint = [];
         var stationsfc = [];
         stations = result;
@@ -105,7 +112,9 @@ function initMap(position) {
         var voronoi = d3.geom.voronoi();
         var vor_polygons = voronoi(oripoint);
 
+        map.data.addGeoJson(points[0]);
         vor_polygons.forEach(function(element, index) {
+            // var intersection = turf.intersect(ArrayToConvex(element), points[0]);
             map.data.addGeoJson(ArrayToConvex(element));
         });
     });
@@ -130,31 +139,54 @@ function ArrayToConvex(e) {
     return turf.intersect(bound, convex);
 }
 
-var weather10MinLevels = [
-    {
-        level: 1, interval: 0, color: '#FFFFFF'
-    }, {
-        level: 2, interval: 1, color: '#F2F2F2'
-    }, {
-        level: 3, interval: 2, color: '#89C0DA'
-    }, {
-        level: 4, interval: 3, color: '#65D97D'
-    }, {
-        level: 5, interval: 4, color: '#98FF72'
-    }, {
-        level: 6, interval: 6, color: '#DBF977'
-    }, {
-        level: 7, interval: 8, color: '#F2B950'
-    }, {
-        level: 8, interval: 10, color: '#D96941'
-    }, {
-        level: 9, interval: 12, color: '#CF323A'
-    }, {
-        level: 10, interval: 14, color: '#9F0909'
-    }, {
-        level: 11, interval: 16, color: '#9E0A38'
-    }, {
-        level: 12, interval: 18, color: '#A41441'
+var weather10MinLevels = [{
+    level: 1,
+    interval: 0,
+    color: '#FFFFFF'
+}, {
+    level: 2,
+    interval: 1,
+    color: '#F2F2F2'
+}, {
+    level: 3,
+    interval: 2,
+    color: '#89C0DA'
+}, {
+    level: 4,
+    interval: 3,
+    color: '#65D97D'
+}, {
+    level: 5,
+    interval: 4,
+    color: '#98FF72'
+}, {
+    level: 6,
+    interval: 6,
+    color: '#DBF977'
+}, {
+    level: 7,
+    interval: 8,
+    color: '#F2B950'
+}, {
+    level: 8,
+    interval: 10,
+    color: '#D96941'
+}, {
+    level: 9,
+    interval: 12,
+    color: '#CF323A'
+}, {
+    level: 10,
+    interval: 14,
+    color: '#9F0909'
+}, {
+    level: 11,
+    interval: 16,
+    color: '#9E0A38'
+}, {
+    level: 12,
+    interval: 18,
+    color: '#A41441'
 }];
 
 function getWeather10MinLevel(rainfall) {
