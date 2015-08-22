@@ -17,6 +17,7 @@
     "nodemon": "^1.4.1",
     "request": "^2.61.0",
     "serve-favicon": "~2.3.0",
+    "sqlite3": "^3.0.10",
     "xml2json": "^0.8.2"
   }
 }
