@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 var turf = require('turf'),
 	extend = require('util')._extend;
 
@@ -81,12 +81,19 @@ var predict = {
 		return false;
 	},
 	// check possible area
-	isPossibleArea : function(newRainyArea, neighborArea, geoInfo) {
-		var start = turf.point([newRainyArea.lon, newRainyArea.lat]),
+	isPossibleArea : function(area, neighborArea, geoInfo) {
+		var start = turf.point([area.lon, area.lat]),
 			end = turf.point([neighborArea.lon, neighborArea.lat]),
-			neighborGeoInfo = geoInfo(start, end);
-		if (geoInfo.bearing - neighborGeoInfo.bearing <= 20) {
-			return true;
+			neighborGeoInfo = geoInfo(start, end),
+			distanceUnit = 0.1,
+			distance = distanceUnit;
+		// use increasing distance to find out passby area
+		while (distance >= geoInfo.distance) {
+			distance = i * idistanceUnit;
+			var point = turf.destination(start, distance, geoInfo.bearing, 'kilometers');
+			if (neighborArea.contains(point)) {
+				return true;
+			}
 		}
 		return false;
 	},
