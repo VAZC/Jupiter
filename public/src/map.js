@@ -54,7 +54,9 @@ function getLocationFail(error) {
 
 function initMap(position) {
     var centerLatLng;
-    var infoWindow = new google.maps.InfoWindow({ content: "" });
+    var infoWindow = new google.maps.InfoWindow({
+        content: ""
+    });
     if (position) {
         centerLatLng = {
             lat: position.coords.latitude,
@@ -103,14 +105,17 @@ function initMap(position) {
                 if (e.feature.getProperty('name')) {
                     var anchor = new google.maps.MVCObject();
                     anchor.set("position", e.latLng);
-                    infoWindow.setContent(e.feature.getProperty('name'));
+                    infoWindow.setContent(e.feature.getProperty('name') + '(' + e.feature.getProperty('station_id') + ')');
                     infoWindow.open(map, anchor);
                 } else {
                     infoWindow.close();
                 }
 
             });
-            var point = turf.point([result[i].lon, result[i].lat], {name: result[i].locationName});
+            var point = turf.point([result[i].lon, result[i].lat], {
+                name: result[i].locationName,
+                station_id: result[i].stationId
+            });
             oripoint.push([result[i].lon, result[i].lat]);
 
             stationsfc.push(point);
