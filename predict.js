@@ -19,8 +19,8 @@ var turf = require('turf'),
 		return newRainyAreas.filter(function(newRainyArea) {
 			var result = true;
 			// filter different
-			oldRainyAreas.forEach(function(oldRainyArea) {	
-				result = !isSameArea(oldRainyArea, newRainyArea);
+			oldRainyAreas.forEach(function(oldRainyArea) {
+				return result = !isSameArea(oldRainyArea, newRainyArea);
 			});
 			return result;
 		});
@@ -73,7 +73,7 @@ module.exports = {
 				// find neighbors
 				console.log(oldRainyArea.getNeighbor());
 				oldRainyArea.getNeighbor().forEach(function(neighborArea) {
-					console.log(neighborArea, newRainyArea);
+					// console.log(neighborArea, newRainyArea);
 					if (isSameArea(neighborArea, newRainyArea)) {
 						var areas = find(oldRainyArea, newRainyArea);
 						possibleAreas.push.apply(possibleAreas, areas);
