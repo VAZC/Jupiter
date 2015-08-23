@@ -34,7 +34,6 @@ var mapStyles = [{
 
 
 function main() {
-    console.log("centerLatLng");
     getLocation();
 }
 
@@ -82,6 +81,14 @@ function initMap(position) {
         map: map
     });
 
+    // rainfall level stage
+    var levelStageDiv = document.createElement('div');
+    var levelControl = new RainfallLevelControl(levelStageDiv);
+    levelStageDiv.index = 1;
+    levelStageDiv.style['padding-right'] = '28px';
+    levelStageDiv.style['padding-bottom'] = '15px';
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(levelStageDiv);
+
     $.when($.get('/taiwan.geo.json'), $.get('/station')).then(function(points, result) {
         result = result[0];
 
@@ -111,7 +118,8 @@ function initMap(position) {
         var voronoi = d3.geom.voronoi();
         var vor_polygons = voronoi(oripoint);
 
-        map.data.addGeoJson(points[0]);
+        // Taiwan Region
+        // map.data.addGeoJson(points[0]);
         vor_polygons.forEach(function(element, index) {
             var rainfall = result[index].min_10;
             var mapData = new google.maps.Data();
@@ -216,4 +224,22 @@ function getWeatherRegionStyle(rainfall) {
     };
 
     return style;
+}
+
+function RainfallLevelControl(controlDiv) {
+    var unitInfoControl = document.createElement('div');
+        unitInfoControl.className = 'row-text';
+        controlDiv.appendChild(unitInfoControl);
+    var unitInfoText = document.createElement('div');
+        unitInfoText.innerHTML = 'mm';
+        unitInfoControl.appendChild(unitInfoText);
+
+    for (var i = 0; i < weather10MinLevels.length; i++) {
+        var childLevelControl = document.createElement('div');
+        childLevelControl.className = 'row level-' + weather10MinLevels[i].level.toString();
+        controlDiv.appendChild(childLevelControl);
+        var childLevelText = document.createElement('div');
+        childLevelText.innerHTML = weather10MinLevels[i].interval.toString();
+        childLevelControl.appendChild(childLevelText);
+    }
 }
