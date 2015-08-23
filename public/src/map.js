@@ -53,9 +53,6 @@ function getLocationFail(error) {
 
 function initMap(position) {
     var centerLatLng;
-    var infoWindow = new google.maps.InfoWindow({
-        content: ""
-    });
     if (position) {
         centerLatLng = {
             lat: position.coords.latitude,
@@ -71,7 +68,7 @@ function initMap(position) {
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: centerLatLng,
-        zoom: 14,
+        zoom: 8,
         mapTypeControlOptions: {
             mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
         }
@@ -99,22 +96,8 @@ function initMap(position) {
             mapData.setStyle({
                 icon: getWeatherStyle(rainfall)
             });
-            mapData.addListener('click', function(e) {
-                console.log(e);
-                if (e.feature.getProperty('name')) {
-                    var anchor = new google.maps.MVCObject();
-                    anchor.set("position", e.latLng);
-                    infoWindow.setContent(e.feature.getProperty('name') + '(' + e.feature.getProperty('station_id') + ')');
-                    infoWindow.open(map, anchor);
-                } else {
-                    infoWindow.close();
-                }
 
-            });
-            var point = turf.point([result[i].lon, result[i].lat], {
-                name: result[i].locationName,
-                station_id: result[i].stationId
-            });
+            var point = turf.point([result[i].lon, result[i].lat]);
             oripoint.push([result[i].lon, result[i].lat]);
 
             stationsfc.push(point);

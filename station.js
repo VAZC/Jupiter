@@ -15,10 +15,10 @@ function Processtime() {
 		startTime = (new Date()).getTime();
 		console.log(prefix + ', 起始時間: ' + startTime);
 	}
-	
+
 	function end(prefix) {
 		var end = (new Date()).getTime();
-		console.log(prefix + ', 結束時間: ' + end + ', 執行秒數: ' + (end - startTime)/1000.0);
+		console.log(prefix + ', 結束時間: ' + end + ', 執行秒數: ' + (end - startTime) / 1000.0);
 	}
 }
 
@@ -30,16 +30,20 @@ function Stations(model) {
 	var getStationsPoint = getStationsPoint;
 	var intersectTaiwan = intersectTaiwan;
 	var calcNeighborhoods = calcNeighborhoods;
+	var isNeighborhoods = isNeighborhoods;
+	var isFeature = isFeature;
+	var isReady = isReady;
 
 	// private
 	var that = this;
 	var stations = [];
 	var taiwan_geo = [];
 	var processtime = new Processtime();
+	var ready = false;
 
 	// public function
 	this.all = function() {
-		JSON.parse(JSON.stringify(stations));
+		return JSON.parse(JSON.stringify(stations));
 	}
 
 	this.refresh = function() {
@@ -48,6 +52,7 @@ function Stations(model) {
 		fetch(function() {
 			_that.voronoi();
 			calcNeighborhoods();
+			ready = true;
 		});
 	}
 
@@ -67,7 +72,7 @@ function Stations(model) {
 			var station = _that.findStationByPoint(element.point);
 			station.setGeoArea(area_polygon);
 
-			if (area_polygon === undefined || area_polygon.length === 0)
+			if (!isFeature(area_polygon))
 				filter_station.push(station);
 		});
 
@@ -103,6 +108,10 @@ function Stations(model) {
 		return turf.convex(fc);
 	}
 
+	function isReady() {
+		return ready;
+	}
+
 	function calcNeighborhoods() {
 		processtime.start('clac Neighborhood');
 		for (var i = 0; i < stations.length; i++) {
@@ -110,14 +119,43 @@ function Stations(model) {
 
 			for (var j = 0; j < stations.length; j++) {
 				var neighbor = stations[j];
-				if (i === j || neighbor.getGeoArea().length == 0 || station.getGeoArea().length == 0) continue;
+				if (i === j) continue;
 
-				if (turf.intersect(station.getGeoArea(), neighbor.getGeoArea()) !== undefined) {
+				if (isNeighborhoods(station, neighbor)) {
 					station.addNeighbor(neighbor);
 				}
 			}
+			// console.log('檢測站：' + station.getName() + '有 ' + station.getNeighbor().length + ' 個鄰居。');
 		}
 		processtime.end('clac Neighborhood');
+	}
+
+	function isNeighborhoods(station, neighbor) {
+		var s_area = station.getGeoArea();
+		var n_area = neighbor.getGeoArea();
+
+		if (!isFeature(s_area) || !isFeature(n_area))
+			return false;
+
+		var s_poly = s_area.geometry.coordinates[0];
+		var n_poly = n_area.geometry.coordinates[0];
+
+		var times = 0;
+		for (var i = 0; i < s_poly.length; i++) {
+			for (var j = 0; j < n_poly.length; j++) {
+				if (s_poly[i][0] === n_poly[j][0] &&
+					s_poly[i][1] === n_poly[j][1]) {
+					if (++times >= 2) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	function isFeature(o) {
+		return typeof(o) === 'object' && o.type === 'Feature';
 	}
 
 	function intersectTaiwan(p) {
