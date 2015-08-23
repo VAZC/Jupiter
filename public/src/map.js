@@ -107,20 +107,7 @@ function initMap(position) {
             mapData.setStyle({
                 icon: getWeatherStyle(rainfall)
             });
-            var point = turf.point([result[i].lon, result[i].lat], {
-                name: result[i].locationName,
-                station_id: result[i].stationId
-            });
-            mapData.addListener('click', function(e) {
-                if (e.feature.getProperty('name')) {
-                    var anchor = new google.maps.MVCObject();
-                    anchor.set("position", e.latLng);
-                    infoWindow.setContent(e.feature.getProperty('name') + '(' + e.feature.getProperty('station_id') + ')');
-                    infoWindow.open(map, anchor);
-                } else {
-                    infoWindow.close();
-                }
-            });
+            var point = turf.point([result[i].lon, result[i].lat]);
             oripoint.push([result[i].lon, result[i].lat]);
 
             stationsfc.push(point);
@@ -143,6 +130,16 @@ function initMap(position) {
             mapData.setStyle(getWeatherRegionStyle(rainfall));
 
             mapData.addGeoJson(ArrayToConvex(element));
+            mapData.addListener('click', function(e) {
+                if (result[index].locationName) {
+                    var anchor = new google.maps.MVCObject();
+                    anchor.set("position", e.latLng);
+                    infoWindow.setContent(result[index].locationName + '(' + result[index].stationId + ')');
+                    infoWindow.open(map, anchor);
+                } else {
+                    infoWindow.close();
+                }
+            });
             mapData.setMap(map);
         });
     });
