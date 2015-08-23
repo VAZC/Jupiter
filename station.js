@@ -33,7 +33,6 @@ function Stations(model) {
 	var isNeighborhoods = isNeighborhoods;
 	var isFeature = isFeature;
 	var isReady = isReady;
-	var setReadyCallback = setReadyCallback;
 
 	// private
 	var that = this;
@@ -45,7 +44,7 @@ function Stations(model) {
 
 	// public function
 	this.all = function() {
-		return JSON.parse(JSON.stringify(stations));
+		return stations;
 	}
 
 	this.refresh = function() {
@@ -111,7 +110,7 @@ function Stations(model) {
 		return turf.convex(fc);
 	}
 
-	function setReadyCallback(callback) {
+	this.setReadyCallback = function(callback) {
 		readyCallback = callback;
 	}
 
@@ -268,10 +267,10 @@ function Station(s) {
 		return belong;
 	}
 	this.getRain = function() {
-		return JSON.parse(JSON.stringify(rain));
+		return rain;
 	}
 	this.getNeighbor = function() {
-		return JSON.parse(JSON.stringify(neighbor));
+		return neighbor;
 	}
 	this.addNeighbor = function(n) {
 		neighbor.push(n);
