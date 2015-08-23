@@ -18,12 +18,13 @@ var mapStyles = [{
         "gamma": 1.18
     }]
 }, {
-   "featureType": "water",
-   "elementType": "geometry",
-   "stylers": [
-     { "Hue": "#739CFF"},
-     { "saturation": 30 }
-     ]
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{
+        "Hue": "#739CFF"
+    }, {
+        "saturation": 30
+    }]
 }, {
     "featureType": "road.highway",
     "elementType": "all",
@@ -52,6 +53,9 @@ function getLocationFail(error) {
 
 function initMap(position) {
     var centerLatLng;
+    var infoWindow = new google.maps.InfoWindow({
+        content: ""
+    });
     if (position) {
         centerLatLng = {
             lat: position.coords.latitude,
@@ -67,7 +71,7 @@ function initMap(position) {
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: centerLatLng,
-        zoom: 8,
+        zoom: 14,
         mapTypeControlOptions: {
             mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
         }
@@ -103,8 +107,20 @@ function initMap(position) {
             mapData.setStyle({
                 icon: getWeatherStyle(rainfall)
             });
-
-            var point = turf.point([result[i].lon, result[i].lat]);
+            var point = turf.point([result[i].lon, result[i].lat], {
+                name: result[i].locationName,
+                station_id: result[i].stationId
+            });
+            mapData.addListener('click', function(e) {
+                if (e.feature.getProperty('name')) {
+                    var anchor = new google.maps.MVCObject();
+                    anchor.set("position", e.latLng);
+                    infoWindow.setContent(e.feature.getProperty('name') + '(' + e.feature.getProperty('station_id') + ')');
+                    infoWindow.open(map, anchor);
+                } else {
+                    infoWindow.close();
+                }
+            });
             oripoint.push([result[i].lon, result[i].lat]);
 
             stationsfc.push(point);
@@ -151,31 +167,54 @@ function ArrayToConvex(e) {
     return turf.intersect(bound, convex);
 }
 
-var weather10MinLevels = [
-    {
-        level: 1, interval: 0, color: '#FFFFFF'
-    }, {
-        level: 2, interval: 1, color: '#C8D6E1'
-    }, {
-        level: 3, interval: 2, color: '#89C0DA'
-    }, {
-        level: 4, interval: 3, color: '#65D97D'
-    }, {
-        level: 5, interval: 4, color: '#98FF72'
-    }, {
-        level: 6, interval: 6, color: '#DBF977'
-    }, {
-        level: 7, interval: 8, color: '#F2B950'
-    }, {
-        level: 8, interval: 10, color: '#D96941'
-    }, {
-        level: 9, interval: 12, color: '#CF323A'
-    }, {
-        level: 10, interval: 14, color: '#9F0909'
-    }, {
-        level: 11, interval: 16, color: '#9E0A38'
-    }, {
-        level: 12, interval: 18, color: '#A41441'
+var weather10MinLevels = [{
+    level: 1,
+    interval: 0,
+    color: '#FFFFFF'
+}, {
+    level: 2,
+    interval: 1,
+    color: '#C8D6E1'
+}, {
+    level: 3,
+    interval: 2,
+    color: '#89C0DA'
+}, {
+    level: 4,
+    interval: 3,
+    color: '#65D97D'
+}, {
+    level: 5,
+    interval: 4,
+    color: '#98FF72'
+}, {
+    level: 6,
+    interval: 6,
+    color: '#DBF977'
+}, {
+    level: 7,
+    interval: 8,
+    color: '#F2B950'
+}, {
+    level: 8,
+    interval: 10,
+    color: '#D96941'
+}, {
+    level: 9,
+    interval: 12,
+    color: '#CF323A'
+}, {
+    level: 10,
+    interval: 14,
+    color: '#9F0909'
+}, {
+    level: 11,
+    interval: 16,
+    color: '#9E0A38'
+}, {
+    level: 12,
+    interval: 18,
+    color: '#A41441'
 }];
 
 function getWeather10MinLevel(rainfall) {
@@ -228,11 +267,11 @@ function getWeatherRegionStyle(rainfall) {
 
 function RainfallLevelControl(controlDiv) {
     var unitInfoControl = document.createElement('div');
-        unitInfoControl.className = 'row-text';
-        controlDiv.appendChild(unitInfoControl);
+    unitInfoControl.className = 'row-text';
+    controlDiv.appendChild(unitInfoControl);
     var unitInfoText = document.createElement('div');
-        unitInfoText.innerHTML = 'mm';
-        unitInfoControl.appendChild(unitInfoText);
+    unitInfoText.innerHTML = 'mm';
+    unitInfoControl.appendChild(unitInfoText);
 
     for (var i = 0; i < weather10MinLevels.length; i++) {
         var childLevelControl = document.createElement('div');
