@@ -33,6 +33,7 @@ function Stations(model) {
 	var isNeighborhoods = isNeighborhoods;
 	var isFeature = isFeature;
 	var isReady = isReady;
+	var setReadyCallback = setReadyCallback;
 
 	// private
 	var that = this;
@@ -40,6 +41,7 @@ function Stations(model) {
 	var taiwan_geo = [];
 	var processtime = new Processtime();
 	var ready = false;
+	var readyCallback = function() {};
 
 	// public function
 	this.all = function() {
@@ -48,11 +50,12 @@ function Stations(model) {
 
 	this.refresh = function() {
 		var _that = that;
-
+		ready = false;
 		fetch(function() {
 			_that.voronoi();
 			calcNeighborhoods();
 			ready = true;
+			readyCallback.call(_that);
 		});
 	}
 
@@ -106,6 +109,10 @@ function Stations(model) {
 		}
 		var fc = turf.featurecollection(tps);
 		return turf.convex(fc);
+	}
+
+	function setReadyCallback(callback) {
+		readyCallback = callback;
 	}
 
 	function isReady() {
