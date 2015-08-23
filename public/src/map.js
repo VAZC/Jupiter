@@ -239,10 +239,11 @@ function getWeatherStyle(rainfall) {
 
     style = {
         path: google.maps.SymbolPath.CIRCLE,
-        fillOpacity: 0.8,
-        fillColor: weather10MinLevels[index].color,
-        strokeOpacity: 0.5,
-        strokeColor: weather10MinLevels[index].color,
+        fillOpacity: 1,
+        fillColor: '#d7d7d7',
+        strokeWeight: 1,
+        strokeOpacity: 0.8,
+        strokeColor: '#333333',
         scale: 6
     };
 
@@ -256,7 +257,9 @@ function getWeatherRegionStyle(rainfall) {
     style = {
         fillOpacity: (level == 1) ? 0 : 0.8,
         fillColor: weather10MinLevels[index].color,
-        strokeWeight: 0
+        strokeWeight: 1,
+        strokeOpacity: 0.3,
+        strokeColor: '#333333'
     };
 
     return style;
