@@ -1,4 +1,7 @@
 var env = require('../env');
+var Stations = require('../station');
+var predict = require('../predict');
+var CronJob = require('cron').CronJob;
 var fs = require('fs');
 var express = require('express');
 var request = require('request');
@@ -17,9 +20,21 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/possibleAreas', function(req, res, next) {
-    // Stations oldList, Stations newList;
-    // predict.possibleAreas(oldList, newList);
-    res.json('working');
+    var stations = Stations.all();
+    var oldAreas = stations.filter(function(station) {
+            if (station.getRain().old > 0) {
+                return true;
+            }
+            return false;
+        }), 
+        newAreas = stations.filter(function(station) {
+            if (station.getRain().old > 0) {
+                return true;
+            }
+            return false;
+        });
+    var list = predict.possibleAreas(oldAreas, newAreas);
+    res.json(list);
 });
 
 router.get('/json', function(req, res, next) {
@@ -63,4 +78,9 @@ router.get('/measurement', function(req, res, next) {
     });
 });
 
+// Stations update
+
+new CronJob('*/2 * * * *', function() {
+    Stations.refresh();
+}, null, true, 'Asia/Taipei');
 module.exports = router;

@@ -9,7 +9,7 @@ var turf = require('turf'),
 			// find possible area
 			newRainyArea.getNeighbor().forEach(function(neighborArea) {
 				if (isPossibleArea(newRainyArea, neighborArea, geoInfo)) {
-					areas.psuh(neighborArea);
+					areas.push(neighborArea);
 				}
 			});
 		return areas;
@@ -19,7 +19,7 @@ var turf = require('turf'),
 		return newRainyAreas.filter(function(newRainyArea) {
 			var result = true;
 			// filter different
-			oldRainyAreas.forEach(function(oldRainyArea) {
+			oldRainyAreas.every(function(oldRainyArea) {
 				return result = !isSameArea(oldRainyArea, newRainyArea);
 			});
 			return result;
@@ -71,9 +71,7 @@ module.exports = {
 		oldRainyAreas.forEach(function(oldRainyArea) {
 			newRainyAreas.forEach(function(newRainyArea) {
 				// find neighbors
-				console.log(oldRainyArea.getNeighbor());
 				oldRainyArea.getNeighbor().forEach(function(neighborArea) {
-					// console.log(neighborArea, newRainyArea);
 					if (isSameArea(neighborArea, newRainyArea)) {
 						var areas = find(oldRainyArea, newRainyArea);
 						possibleAreas.push.apply(possibleAreas, areas);
